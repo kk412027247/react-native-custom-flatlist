@@ -1,5 +1,5 @@
 import {Component} from "react";
-import {Animated,  FlatList, Platform, StyleSheet, View} from "react-native";
+import {Animated,  FlatList, Platform, StyleSheet, View, Button} from "react-native";
 import React from "react";
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -10,6 +10,24 @@ export default class RnCustomFlatList extends Component {
   state = {
     scrollY: new Animated.Value(Platform.OS === 'ios' ? -this.props.headerHeight : 0),
   };
+
+
+  scrollTo = (num) => {
+    // console.log(this.myRef.getNode());
+    // this.myRef.getNode().scrollToEnd()
+    // this.myRef.getNode().scrollToIndex({animated: true, index: 0});
+    this.myRef.getNode().scrollToOffset({offset:-100, animated:true})
+  };
+
+  // componentDidMount(){
+  //   this.myRef.getNode().scrollToOffset({offset:-100, animated:false})
+  // }
+
+  getItemLayout = (data, index) => (
+    { length: 70, offset: 70 * index, index }
+  );
+
+  ref = c => this.myRef = c ;
 
   render() {
 
@@ -63,22 +81,26 @@ export default class RnCustomFlatList extends Component {
 
     return (
       <View style={styles.container}>
+
         <Animated.View style={headerStyle} pointerEvents="none">
           <Animated.View style={subHeaderStyle} pointerEvents="none">
             <Header/>
           </Animated.View>
         </Animated.View>
+
         <AnimatedFlatList
+          ref={this.ref}
+          // initialScrollIndex={1}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           data={data}
           contentContainerStyle={contentContainerStyle}
-          scrollEventThrottle={1}
+          scrollEventThrottle={2}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
             { useNativeDriver: true },
           )}
-       
+          getItemLayout={this.getItemLayout}
           refreshing={refreshing}
           onRefresh={onRefresh}
           // Android offset for RefreshControl
@@ -86,7 +108,7 @@ export default class RnCustomFlatList extends Component {
           contentInset={contentInset}
           contentOffset={contentOffset}
         />
-
+        <Button title={'button'} onPress={this.scrollTo.bind(null, 10)}/>
       </View>
     );
   }
@@ -99,7 +121,7 @@ const styles = StyleSheet.create({
   },
   header:{
     width:'100%',
-    
+
     backgroundColor:'#fff' ,
     position: 'absolute',
     top:0,
